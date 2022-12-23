@@ -1,4 +1,4 @@
-package utils;
+package rtc.utils;
 
 /**
  * Vector util in three dimension.
@@ -18,6 +18,11 @@ public class Vec3 {
     public Vec3 subtract(Vec3 rv) { return new Vec3(v[0] - rv.x(), v[1] - rv.y(), v[2] - rv.z()); }
     public Vec3 multiply(Vec3 rv) { return new Vec3(v[0] * rv.x(), v[1] * rv.y(), v[2] * rv.z()); }
     public Vec3 divide(Vec3 rv) { return new Vec3(v[0] / rv.x(), v[1] / rv.y(), v[2] / rv.z()); }
+
+    public Vec3 add(double rv) { return new Vec3(v[0] + rv, v[1] + rv, v[2] + rv); }
+    public Vec3 subtract(double rv) { return new Vec3(v[0] - rv, v[1] - rv, v[2] - rv); }
+    public Vec3 multiply(double rv) { return new Vec3(v[0] * rv, v[1] * rv, v[2] * rv); }
+    public Vec3 divide(double rv) { return new Vec3(v[0] / rv, v[1] / rv, v[2] / rv); }
 
     public double lengthSquared() {
         return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];

@@ -1,5 +1,6 @@
-import utils.Test;
-import utils.Vec3;
+import rtc.utils.Ray;
+import rtc.utils.Test;
+import rtc.utils.Vec3;
 
 /**
  * Test functions for accuracy.
@@ -7,6 +8,7 @@ import utils.Vec3;
 public class TestAll {
     public static void main(String[] args) {
         testVec3();
+        testRay();
 
         Test.over();
     }
@@ -19,5 +21,10 @@ public class TestAll {
         Test.equalDouble(5, v1.length());
         Test.equalDouble(7, v1.dot(v2));
         Test.equalDouble(1, v1.cross(v2).normalize().z());
+    }
+
+    static void testRay() {
+        Ray r1 = new Ray(new Vec3(), new Vec3(0, 0, -1));
+        Test.equalDouble(-2, r1.at(2).z());
     }
 }
