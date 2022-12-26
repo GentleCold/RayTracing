@@ -20,22 +20,33 @@ public class RayTracing {
     private final ShapeList shapeList;
     private final int imageWidth;
     private final int imageHeight;
+    private final int pixelSamples;
     private final int[] imageData;
 
     /**
      * default width set to 1920, height set to 1080
      * @param camera camera config
      * @param shapeList shapeList config
+     * @param pixelSamples pixel samples for antialiasing
      */
-    public RayTracing(Camera camera, ShapeList shapeList) {
-        this(1920, 1080, camera, shapeList);
+    public RayTracing(Camera camera, ShapeList shapeList, int pixelSamples) {
+        this(1920, 1080, camera, shapeList, pixelSamples);
     }
 
-    public RayTracing(int imageWidth, int imageHeight, Camera camera, ShapeList shapeList) {
+    /**
+     * @param imageWidth output img width
+     * @param imageHeight output img height
+     * @param camera camera config
+     * @param shapeList shapeList config
+     * @param pixelSamples pixel samples for antialiasing
+     */
+    public RayTracing(int imageWidth, int imageHeight, Camera camera, ShapeList shapeList, int pixelSamples) {
+        assert pixelSamples > 0; // must be greater than 1
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         this.camera = camera;
         this.shapeList = shapeList;
+        this.pixelSamples = pixelSamples;
         imageData = new int[imageWidth * imageHeight];
     }
 
@@ -45,17 +56,17 @@ public class RayTracing {
      */
     public void run(final String fileLoc) {
         int pixel = 0;
-        for (int j = imageHeight; j > 0; j--) {
+        for (int j = imageHeight - 1; j >= 0; j--) {
             for (int i = 0; i < imageWidth; i++) {
-                double u = (double)i / imageWidth;
-                double v = (double)j / imageHeight;
+                // random sampling
+                double u = (i + Math.random()) / (imageWidth - 1);
+                double v = (j + Math.random()) / (imageHeight - 1);
 
-                // ray: corner + u * x + v * y - origin
-                int pixelData = _rayColor(new Ray(Camera.origin, camera.lowerLeftCorner()
-                        .add(camera.horizontal().multiply(u))
-                        .add(camera.vertical().multiply(v))
-                        .subtract(Camera.origin)));
-                imageData[pixel++] = pixelData;
+                Vec3 color = new Vec3();
+                for (int k = 0; k < pixelSamples; k++) {
+                    color = color.add(_rayColor(camera.getRay(u, v)));
+                }
+                imageData[pixel++] = _rgb2Int(color.divide(pixelSamples));
             }
         }
 
@@ -70,18 +81,18 @@ public class RayTracing {
     /**
      * calculate the color according to ray
      * @param r ray
-     * @return color data
+     * @return rgb vector
      */
-    private int _rayColor(Ray r) {
+    private Vec3 _rayColor(Ray r) {
         HitInfo h = new HitInfo();
         // hit render
         if (shapeList.ifHit(r, 0, Double.POSITIVE_INFINITY, h)) {
-            return _rgb2Int(h.normal.add(1).multiply(0.5)); // normal map to rgb
+            return h.normal.add(1).multiply(0.5); // normal map to rgb
         }
         // background render, linear gradient
         Vec3 e = r.direction().normalize();
         var t = 0.5 * (e.y() + 1.0);
-        return _rgb2Int(new Vec3(1, 1, 1).multiply(1 - t).add(new Vec3(0.5, 0.7, 1.0).multiply(t)));
+        return new Vec3(1, 1, 1).multiply(1 - t).add(new Vec3(0.5, 0.7, 1.0).multiply(t));
     }
 
     private void _output(final String fileLoc) throws IOException {

@@ -21,6 +21,7 @@ public class TestAll {
         Test.equalDouble(5, v1.length());
         Test.equalDouble(7, v1.dot(v2));
         Test.equalDouble(1, v1.cross(v2).normalize().z());
+        Test.equalDouble(0.01, new Vec3().add(new Vec3(0.01, 0, 0)).x());
     }
 
     static void testRay() {
