@@ -24,6 +24,8 @@ public class Vec3 {
     public Vec3 multiply(double rv) { return new Vec3(v[0] * rv, v[1] * rv, v[2] * rv); }
     public Vec3 divide(double rv) { return new Vec3(v[0] / rv, v[1] / rv, v[2] / rv); }
 
+    public Vec3 minus() { return new Vec3(-v[0], -v[1], -v[2]); }
+
     public double lengthSquared() {
         return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
     }

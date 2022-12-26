@@ -1,7 +1,8 @@
 package rtc;
 
 import rtc.render.Camera;
-import rtc.render.Stage;
+import rtc.shape.ShapeList;
+import rtc.utils.HitInfo;
 import rtc.utils.Ray;
 import rtc.utils.Vec3;
 
@@ -16,20 +17,25 @@ import java.io.IOException;
  */
 public class RayTracing {
     private final Camera camera;
-    private final Stage stage;
+    private final ShapeList shapeList;
     private final int imageWidth;
     private final int imageHeight;
     private final int[] imageData;
 
-    public RayTracing(Camera camera, Stage stage) {
-        this(1920, 1080, camera, stage);
+    /**
+     * default width set to 1920, height set to 1080
+     * @param camera camera config
+     * @param shapeList shapeList config
+     */
+    public RayTracing(Camera camera, ShapeList shapeList) {
+        this(1920, 1080, camera, shapeList);
     }
 
-    public RayTracing(int imageWidth, int imageHeight, Camera camera, Stage stage) {
+    public RayTracing(int imageWidth, int imageHeight, Camera camera, ShapeList shapeList) {
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         this.camera = camera;
-        this.stage = stage;
+        this.shapeList = shapeList;
         imageData = new int[imageWidth * imageHeight];
     }
 
@@ -44,6 +50,7 @@ public class RayTracing {
                 double u = (double)i / imageWidth;
                 double v = (double)j / imageHeight;
 
+                // ray: corner + u * x + v * y - origin
                 int pixelData = _rayColor(new Ray(Camera.origin, camera.lowerLeftCorner()
                         .add(camera.horizontal().multiply(u))
                         .add(camera.vertical().multiply(v))
@@ -60,10 +67,21 @@ public class RayTracing {
         }
     }
 
+    /**
+     * calculate the color according to ray
+     * @param r ray
+     * @return color data
+     */
     private int _rayColor(Ray r) {
-        Vec3 d = r.direction().normalize();
-        var t = 0.5 * (d.y() + 1.0);
-        return _vec2Int(new Vec3(1, 1, 1).multiply(1 - t).add(new Vec3(0.5, 0.7, 1.0).multiply(t)));
+        HitInfo h = new HitInfo();
+        // hit render
+        if (shapeList.ifHit(r, 0, Double.POSITIVE_INFINITY, h)) {
+            return _rgb2Int(h.normal.add(1).multiply(0.5)); // normal map to rgb
+        }
+        // background render, linear gradient
+        Vec3 e = r.direction().normalize();
+        var t = 0.5 * (e.y() + 1.0);
+        return _rgb2Int(new Vec3(1, 1, 1).multiply(1 - t).add(new Vec3(0.5, 0.7, 1.0).multiply(t)));
     }
 
     private void _output(final String fileLoc) throws IOException {
@@ -82,7 +100,7 @@ public class RayTracing {
         }
     }
 
-    private int _vec2Int(Vec3 color) {
+    private int _rgb2Int(Vec3 color) {
         int r = (int)(255 * color.x());
         int g = (int)(255 * color.y());
         int b = (int)(255 * color.z());
