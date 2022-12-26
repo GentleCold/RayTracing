@@ -23,7 +23,7 @@ public class Sphere extends Shape {
         if (delta < 0) return false;
         // answer of equation
         delta = Math.sqrt(delta);
-        var answer = (-halfB - delta) / a; // the nearest pos
+        var answer = (-halfB - delta) / a; // silly2: must be the minimum answer at first
         // in the correct limitation
         if (answer < minScale || answer > maxScale) {
             answer = (-halfB + delta) / a;

@@ -56,15 +56,15 @@ public class RayTracing {
      */
     public void run(final String fileLoc) {
         int pixel = 0;
+        // silly1: must generate img from left top corner per line
         for (int j = imageHeight - 1; j >= 0; j--) {
             for (int i = 0; i < imageWidth; i++) {
-                // random sampling
-                double u = (i + Math.random()) / (imageWidth - 1);
-                double v = (j + Math.random()) / (imageHeight - 1);
-
                 Vec3 color = new Vec3();
                 for (int k = 0; k < pixelSamples; k++) {
-                    color = color.add(_rayColor(camera.getRay(u, v)));
+                    // silly4: must generate a random ray every time
+                    double u = (i + Math.random()) / (imageWidth - 1);
+                    double v = (j + Math.random()) / (imageHeight - 1);
+                    color = color.add(_rayColor(camera.getRay(u, v))); // silly3: must override
                 }
                 imageData[pixel++] = _rgb2Int(color.divide(pixelSamples));
             }
