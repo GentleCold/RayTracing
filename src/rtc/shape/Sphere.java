@@ -23,10 +23,10 @@ public class Sphere extends Shape {
         if (delta < 0) return false;
         // answer of equation
         delta = Math.sqrt(delta);
-        var answer = (-halfB + delta) / a;
+        var answer = (-halfB - delta) / a; // the nearest pos
         // in the correct limitation
         if (answer < minScale || answer > maxScale) {
-            answer = (-halfB - delta) / a;
+            answer = (-halfB + delta) / a;
             if (answer < minScale || answer > maxScale) return false;
         }
         // set hit info
