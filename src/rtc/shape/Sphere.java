@@ -1,19 +1,20 @@
 package rtc.shape;
 
-import rtc.utils.HitInfo;
+import rtc.material.Material;
 import rtc.utils.Ray;
 import rtc.utils.Vec3;
 
 public class Sphere extends Shape {
     private final Vec3 center;
     private final double radius;
-    public Sphere(Vec3 center, double radius) {
+    public Sphere(Vec3 center, double radius, Material m) {
         this.center = center;
         this.radius = radius;
+        this.m = m;
     }
 
     @Override
-    public boolean ifHit(Ray r, double minScale, double maxScale, HitInfo h) {
+    public boolean ifHit(Ray r, double minScale, double maxScale) {
         Vec3 oc = r.origin().subtract(center);
         // b^2 - 4ac
         var a = r.direction().lengthSquared();

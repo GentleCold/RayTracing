@@ -1,11 +1,11 @@
 package rtc.utils;
 
 /**
- * Vector util in three dimension.
+ * Vector util in three dimensions.
  * @author GentleCold
  */
 public class Vec3 {
-    private final double[] v;
+    protected final double[] v;
 
     public Vec3() { v = new double[3]; }
     public Vec3(double v1, double v2, double v3) { v = new double[]{v1, v2, v3}; }
@@ -59,5 +59,13 @@ public class Vec3 {
     public Vec3 normalize() {
         var length = this.length();
         return new Vec3(v[0] / length, v[1] / length, v[2] / length);
+    }
+
+    /**
+     * judge if the vector is close to zero in all dimensions
+     */
+    public boolean ifNearZero() {
+        double e = 1e-8;
+        return (Math.abs(v[0]) < e) && (Math.abs(v[1]) < e) && (Math.abs(v[2]) < e);
     }
 }

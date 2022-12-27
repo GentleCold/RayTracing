@@ -1,5 +1,6 @@
 package rtc;
 
+import rtc.material.Material;
 import rtc.render.Camera;
 import rtc.shape.ShapeList;
 import rtc.utils.HitInfo;
@@ -59,6 +60,8 @@ public class RayTracing {
      * @param fileLoc Location of png to store the result
      */
     public void run(final String fileLoc) {
+        long startTime = System.currentTimeMillis();
+        /* -------------------- start render -------------------- */
         int pixel = 0;
         // silly1: must generate img from left top corner per line
         for (int j = imageHeight - 1; j >= 0; j--) {
@@ -74,8 +77,10 @@ public class RayTracing {
                 imageData[pixel++] = _rgb2Int(color.divide(pixelSamples));
             }
         }
+        /* -------------------- end render -------------------- */
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Render finish in %d ms, writing to file...\n", endTime - startTime);
 
-        System.out.println("Render finish, writing to file...");
         try {
             _output(fileLoc);
         } catch (IOException e) {
@@ -89,15 +94,15 @@ public class RayTracing {
      * @return rgb vector
      */
     private Vec3 _rayColor(Ray r, int leftDepth) {
-        HitInfo h = new HitInfo();
         if (leftDepth <= 0) {
             return new Vec3(); // no color
         }
         // hit render, set 0.001 to avoid shadow acne
-        if (shapeList.ifHit(r, 0.001, Double.POSITIVE_INFINITY, h)) {
-            // ideal lambertian
-            Ray reflectRay = new Ray(h.point, _randomPoint(h.point.add(h.normal)).subtract(h.point));
-            return _rayColor(reflectRay, leftDepth - 1).multiply(0.5); // simulate light absorption
+        if (shapeList.ifHit(r, 0.001, Double.POSITIVE_INFINITY)) {
+            HitInfo h = shapeList.h;
+            Material m = shapeList.m;
+            Ray reflectRay = m.scatter(r, h);
+            return _rayColor(reflectRay, leftDepth - 1).multiply(m.albedo); // simulate light absorption
         }
         // background render, linear gradient
         Vec3 e = r.direction().normalize();
@@ -127,13 +132,5 @@ public class RayTracing {
         int g = (int)(255 * Math.sqrt(color.y()));
         int b = (int)(255 * Math.sqrt(color.z()));
         return (r << 16) | (g << 8) | b;
-    }
-
-    private Vec3 _randomPoint(Vec3 center) {
-        // random unit vector
-        var x = Math.random() * 2 - 1;
-        var y = Math.random() * 2 - 1;
-        var z = Math.sqrt(1 - x * x - y * y);
-        return new Vec3(x, y, z).add(center);
     }
 }

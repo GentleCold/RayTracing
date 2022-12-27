@@ -14,7 +14,7 @@ public class Test {
         } else {
             var loc = Thread.currentThread().getStackTrace()[2];
             var errInfo = String.format(
-                    "at %s.%s(%s:%s) expect: %d actual: %d",
+                    "at %s.%s(%s:%s) expect: %d actual: %d\n",
                     loc.getClassName(),
                     loc.getMethodName(),
                     loc.getFileName(),
@@ -32,7 +32,7 @@ public class Test {
         } else {
             var loc = Thread.currentThread().getStackTrace()[2];
             var errInfo = String.format(
-                    "at %s.%s(%s:%s) expect: %f actual: %f",
+                    "at %s.%s(%s:%s) expect: %f actual: %f\n",
                     loc.getClassName(),
                     loc.getMethodName(),
                     loc.getFileName(),

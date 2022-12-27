@@ -1,4 +1,6 @@
 import rtc.RayTracing;
+import rtc.material.Lambertian;
+import rtc.material.Metal;
 import rtc.render.Camera;
 import rtc.shape.ShapeList;
 import rtc.shape.Sphere;
@@ -13,9 +15,9 @@ public class Example {
         // 2. add shapes
         // a sphere for example, center pos and radius was needed
         Vec3 center = new Vec3(0, 0, -1);
-        Sphere shape1 = new Sphere(center, 0.5);
+        Sphere shape1 = new Sphere(center, 0.5, new Lambertian(new Vec3(251, 122, 2)));
         center = new Vec3(0, -100.5, -1);
-        Sphere shape2 = new Sphere(center, 100);
+        Sphere shape2 = new Sphere(center, 100, new Metal(new Vec3(73, 156, 84), 0.5));
         // then add to ShapeList
         ShapeList s = new ShapeList();
         s.add(shape1);
