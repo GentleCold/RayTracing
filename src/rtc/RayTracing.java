@@ -21,6 +21,7 @@ public class RayTracing {
     private final int imageWidth;
     private final int imageHeight;
     private final int pixelSamples;
+    private final int depth;
     private final int[] imageData;
 
     /**
@@ -28,9 +29,10 @@ public class RayTracing {
      * @param camera camera config
      * @param shapeList shapeList config
      * @param pixelSamples pixel samples for antialiasing
+     * @param depth max reflection times of ray
      */
-    public RayTracing(Camera camera, ShapeList shapeList, int pixelSamples) {
-        this(1920, 1080, camera, shapeList, pixelSamples);
+    public RayTracing(Camera camera, ShapeList shapeList, int pixelSamples, int depth) {
+        this(1920, 1080, camera, shapeList, pixelSamples, depth);
     }
 
     /**
@@ -39,14 +41,16 @@ public class RayTracing {
      * @param camera camera config
      * @param shapeList shapeList config
      * @param pixelSamples pixel samples for antialiasing
+     * @param depth max reflection times of ray
      */
-    public RayTracing(int imageWidth, int imageHeight, Camera camera, ShapeList shapeList, int pixelSamples) {
+    public RayTracing(int imageWidth, int imageHeight, Camera camera, ShapeList shapeList, int pixelSamples, int depth) {
         assert pixelSamples > 0; // must be greater than 1
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         this.camera = camera;
         this.shapeList = shapeList;
         this.pixelSamples = pixelSamples;
+        this.depth = depth;
         imageData = new int[imageWidth * imageHeight];
     }
 
@@ -60,11 +64,12 @@ public class RayTracing {
         for (int j = imageHeight - 1; j >= 0; j--) {
             for (int i = 0; i < imageWidth; i++) {
                 Vec3 color = new Vec3();
+                // antialiasing
                 for (int k = 0; k < pixelSamples; k++) {
                     // silly4: must generate a random ray every time
                     double u = (i + Math.random()) / (imageWidth - 1);
                     double v = (j + Math.random()) / (imageHeight - 1);
-                    color = color.add(_rayColor(camera.getRay(u, v))); // silly3: must override
+                    color = color.add(_rayColor(camera.getRay(u, v), depth)); // silly3: must override
                 }
                 imageData[pixel++] = _rgb2Int(color.divide(pixelSamples));
             }
@@ -83,11 +88,16 @@ public class RayTracing {
      * @param r ray
      * @return rgb vector
      */
-    private Vec3 _rayColor(Ray r) {
+    private Vec3 _rayColor(Ray r, int leftDepth) {
         HitInfo h = new HitInfo();
-        // hit render
-        if (shapeList.ifHit(r, 0, Double.POSITIVE_INFINITY, h)) {
-            return h.normal.add(1).multiply(0.5); // normal map to rgb
+        if (leftDepth <= 0) {
+            return new Vec3(); // no color
+        }
+        // hit render, set 0.001 to avoid shadow acne
+        if (shapeList.ifHit(r, 0.001, Double.POSITIVE_INFINITY, h)) {
+            // ideal lambertian
+            Ray reflectRay = new Ray(h.point, _randomPoint(h.point.add(h.normal)).subtract(h.point));
+            return _rayColor(reflectRay, leftDepth - 1).multiply(0.5); // simulate light absorption
         }
         // background render, linear gradient
         Vec3 e = r.direction().normalize();
@@ -112,9 +122,18 @@ public class RayTracing {
     }
 
     private int _rgb2Int(Vec3 color) {
-        int r = (int)(255 * color.x());
-        int g = (int)(255 * color.y());
-        int b = (int)(255 * color.z());
+        // gamma correction, gamma = 2
+        int r = (int)(255 * Math.sqrt(color.x()));
+        int g = (int)(255 * Math.sqrt(color.y()));
+        int b = (int)(255 * Math.sqrt(color.z()));
         return (r << 16) | (g << 8) | b;
+    }
+
+    private Vec3 _randomPoint(Vec3 center) {
+        // random unit vector
+        var x = Math.random() * 2 - 1;
+        var y = Math.random() * 2 - 1;
+        var z = Math.sqrt(1 - x * x - y * y);
+        return new Vec3(x, y, z).add(center);
     }
 }

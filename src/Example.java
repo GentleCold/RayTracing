@@ -21,7 +21,7 @@ public class Example {
         s.add(shape1);
         s.add(shape2);
         // 3. feed them to rtc and run!
-        RayTracing rtc = new RayTracing((int)(400 * aspectRatio), 400, c, s, 100);
+        RayTracing rtc = new RayTracing((int)(400 * aspectRatio), 400, c, s, 100, 50);
         rtc.run("img/img1.png");
     }
 }
