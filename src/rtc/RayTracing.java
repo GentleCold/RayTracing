@@ -65,6 +65,8 @@ public class RayTracing {
         int pixel = 0;
         // silly1: must generate img from left top corner per line
         for (int j = imageHeight - 1; j >= 0; j--) {
+            System.out.print('\r');
+            System.out.print("remain: " + j);
             for (int i = 0; i < imageWidth; i++) {
                 Vec3 color = new Vec3();
                 // antialiasing

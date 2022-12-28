@@ -1,6 +1,7 @@
 import rtc.RayTracing;
 import rtc.material.Dielectric;
 import rtc.material.Lambertian;
+import rtc.material.Material;
 import rtc.material.Metal;
 import rtc.render.Camera;
 import rtc.shape.ShapeList;
@@ -12,22 +13,29 @@ public class Example {
         // aspect ratio is recommended
         double aspectRatio = 16 / 9d;
         // 1. config the camera, default position was (0, 0, 0) and face negative half z-axis
-        Camera c = new Camera(2 * aspectRatio, 2, 1);
+        Camera c = new Camera(new Vec3(-2, 2, 1), new Vec3(0, 0, -1), new Vec3(0, 1, 0), aspectRatio, 2, 180);
         // 2. add shapes
         // a sphere for example, center pos and radius was needed
-        Vec3 center = new Vec3(0, 0, -1);
-        Sphere shape1 = new Sphere(center, 0.5, new Lambertian(new Vec3(251, 122, 2)));
-        center = new Vec3(-1, 0, -1);
-        Sphere shape2 = new Sphere(center, 0.5, new Dielectric(1.5));
-        center = new Vec3(0, -100.5, -1);
-        Sphere shape3 = new Sphere(center, 100, new Metal(new Vec3(73, 156, 84), 0.5));
-        // then add to ShapeList
         ShapeList s = new ShapeList();
-        s.add(shape1);
-        s.add(shape2);
-        s.add(shape3);
+        for (int x = 0; x < 5; x++) {
+            for (int z = 0; z < 5; z++) {
+                Material m;
+                double r = Math.random();
+                if (r < 0.3) {
+                    m = new Metal(new Vec3(Math.random() * 255, Math.random() * 255, Math.random() * 255), Math.random());
+                } else if (r < 0.9) {
+                    m = new Lambertian(new Vec3(Math.random() * 255, Math.random() * 255, Math.random() * 255));
+                } else {
+                    m = new Dielectric(1.5);
+                }
+                s.add(new Sphere(new Vec3(x * 2 + Math.random(), 0, -z * 2 + Math.random()), 0.5, m));
+            }
+        }
+        Sphere bottom = new Sphere(new Vec3(0, -100.5, -1), 100, new Lambertian(new Vec3(240, 167, 50)));
+        // then add to ShapeList
+        s.add(bottom);
         // 3. feed them to rtc and run!
-        RayTracing rtc = new RayTracing((int)(400 * aspectRatio), 400, c, s, 100, 50);
+        RayTracing rtc = new RayTracing((int)(1080 * aspectRatio), 1080, c, s, 100, 50);
         rtc.run("img/img1.png");
     }
 }
